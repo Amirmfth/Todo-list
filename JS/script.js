@@ -5,6 +5,7 @@ const editButton = document.getElementById("edit-button");
 const alertMessage = document.getElementById("alert-message");
 const todosBody = document.querySelector("tbody");
 const deleteAllButton = document.getElementById("delete-all-button");
+const filterButtons = document.querySelectorAll(".filter-todos");
 
 let todos = JSON.parse(localStorage.getItem("todos")) || [];
 
@@ -31,13 +32,14 @@ const showAlert = (message, type) => {
   }, 2000);
 };
 
-const displayTodos = () => {
+const displayTodos = (data) => {
+  const todosList = data || todos;
   todosBody.innerHTML = "";
-  if (!todos.length) {
+  if (!todosList.length) {
     todosBody.innerHTML = "<tr><td colspan='4'>No task found</td></tr>";
     return;
   }
-  todos.forEach((todo) => {
+  todosList.forEach((todo) => {
     todosBody.innerHTML += `
         <tr>
             <td>${todo.task}</td>        
@@ -96,39 +98,59 @@ const deleteHandler = (id) => {
 };
 
 const toggleHandler = (id) => {
-  const todo = todos.find(todo => todo.id === id)
+  const todo = todos.find((todo) => todo.id === id);
   todo.completed = !todo.completed;
   saveToLocalStorage();
   displayTodos();
   showAlert("Todo status changed successfully", "success");
 };
 
-const editHandler = id => {
-  const todo = todos.find(todo => todo.id === id)
+const editHandler = (id) => {
+  const todo = todos.find((todo) => todo.id === id);
   taskInput.value = todo.task;
   dateInput.value = todo.date;
   addButton.style.display = "none";
   editButton.style.display = "inline-block";
-  editButton.dataset.id = id
-}
+  editButton.dataset.id = id;
+};
 
-const applyEdithandler = event => {
+const applyEdithandler = (event) => {
   const id = event.target.dataset.id;
-  const todo = todos.find(todo => todo.id === id)
+  const todo = todos.find((todo) => todo.id === id);
   todo.task = taskInput.value;
   todo.date = dateInput.value;
   taskInput.value = "";
   dateInput.value = "";
   addButton.style.display = "inline-block";
   editButton.style.display = "none";
-  saveToLocalStorage()
-  displayTodos()
-  showAlert("Todo edited successfully" , "success")
-}
+  saveToLocalStorage();
+  displayTodos();
+  showAlert("Todo edited successfully", "success");
+};
 
+const filterHandler = (event) => {
+  let filteredTodos = null;
+  const filter = event.target.dataset.filter;
+  switch (filter) {
+    case "pending":
+      filteredTodos = todos.filter((todo) => todo.completed === false);
+      break;
 
+    case "completed":
+      filteredTodos = todos.filter((todo) => todo.completed === true);
+      break;
 
-window.addEventListener("load", displayTodos);
+    default:
+      filteredTodos = todos;
+      break;
+  }
+  displayTodos(filteredTodos);
+};
+
+window.addEventListener("load",() => displayTodos());
 addButton.addEventListener("click", addHandler);
 deleteAllButton.addEventListener("click", deleteAllHandler);
-editButton.addEventListener("click" , applyEdithandler)
+editButton.addEventListener("click", applyEdithandler);
+filterButtons.forEach((button) => {
+  button.addEventListener("click", filterHandler);
+});
