@@ -2,17 +2,20 @@ const taskInput = document.getElementById("task-input");
 const dateInput = document.getElementById("date-input");
 const addButton = document.getElementById("add-button");
 const alertMessage = document.getElementById("alert-message");
-const todosBody = document.querySelector("tbody")
+const todosBody = document.querySelector("tbody");
+const deleteAllButton = document.getElementById("delete-all-button")
 
-const todos = JSON.parse(localStorage.getItem("todos")) || [];
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
 
 const generateId = () => {
-  return Math.round(Math.random() * Math.random() * Math.pow(10, 15)).toString();
+  return Math.round(
+    Math.random() * Math.random() * Math.pow(10, 15)
+  ).toString();
 };
 
 const saveToLocalStorage = () => {
-    localStorage.setItem("todos" , JSON.stringify(todos))
-}
+  localStorage.setItem("todos", JSON.stringify(todos));
+};
 
 const showAlert = (message, type) => {
   alertMessage.innerHTML = "";
@@ -28,14 +31,13 @@ const showAlert = (message, type) => {
 };
 
 const displayTodos = () => {
-    todosBody.innerHTML = ""
-    if(!todos.length) {
-        todosBody.innerHTML = "<tr><td colspan='4'>No task found</td></tr>"
-        return;
-    }
-    console.log(todos)
-    todos.forEach(todo => {
-        todosBody.innerHTML += `
+  todosBody.innerHTML = "";
+  if (!todos.length) {
+    todosBody.innerHTML = "<tr><td colspan='4'>No task found</td></tr>";
+    return;
+  }
+  todos.forEach((todo) => {
+    todosBody.innerHTML += `
         <tr>
             <td>${todo.task}</td>        
             <td>${todo.date || "No Date"}</td>        
@@ -46,9 +48,9 @@ const displayTodos = () => {
                 <button>Delete</button>
             </td>        
         </tr>
-        `
-    } )
-}
+        `;
+  });
+};
 
 const addHandler = (event) => {
   const task = taskInput.value;
@@ -65,11 +67,23 @@ const addHandler = (event) => {
     displayTodos();
     taskInput.value = "";
     dateInput.value = "";
-    console.log(todos)
     showAlert("Todo added successfully", "success");
   } else {
     showAlert("Please enter a todo!", "error");
   }
 };
 
+const deleteAllHandler = () => {
+  if ( todos.length) {
+    todos = [];
+    saveToLocalStorage()
+    displayTodos()
+    showAlert("All todos cleared successfully" , "success")
+  } else {
+    showAlert("No todos to clear" , "error")
+  }
+}
+
+window.addEventListener("load", displayTodos);
 addButton.addEventListener("click", addHandler);
+deleteAllButton.addEventListener("click" , deleteAllHandler)
